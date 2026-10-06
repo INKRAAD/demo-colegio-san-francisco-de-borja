@@ -33,7 +33,7 @@ export function useSmoothScroll(enabled: boolean) {
 export function scrollToId(id: string) {
   const el = document.getElementById(id)
   if (!el) return
-  if (lenis) lenis.scrollTo(el, { offset: -72, duration: 1.4 })
+  if (lenis) lenis.scrollTo(el, { duration: 1.4 }) // respeta scroll-padding-top (88px) del html
   else el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
 }
 

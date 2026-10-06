@@ -33,7 +33,7 @@ export function Hero({ ready }: { ready: boolean }) {
         <g fill="none" stroke="#F9CB24" strokeWidth="1" strokeOpacity=".35">
           <path className="hero-line" pathLength={1} strokeDasharray="1" d="M-60 230 L1500 930" />
           <path className="hero-line" pathLength={1} strokeDasharray="1" d="M1500 150 L-60 840" />
-          <path className="hero-line" pathLength={1} strokeDasharray="1" d="M1010 -20 V940" />
+          <path className="hero-line" pathLength={1} strokeDasharray="1" d="M1040 -20 V940" />
         </g>
       </svg>
 
@@ -72,6 +72,7 @@ export function Hero({ ready }: { ready: boolean }) {
               <dd className="mt-1 flex items-center gap-1 font-semibold"><IconStar className="h-4 w-4 text-oro" /> {COLEGIO.rating.toFixed(1).replace('.', ',')} · ≈{COLEGIO.resenas} reseñas</dd>
             </div>
           </dl>
+          <p className="hero-fade mt-3 text-[0.7rem] text-crema/45">* Calificación según directorios que replican la ficha de Google; por verificar.</p>
         </div>
 
         <div className="relative order-first h-[38vh] min-h-[260px] md:order-none md:h-[78vh]">

@@ -23,7 +23,11 @@ export function Header() {
     return () => window.removeEventListener('keydown', esc)
   }, [open])
 
-  const go = (id: string) => (e: React.MouseEvent) => { e.preventDefault(); setOpen(false); scrollToId(id) }
+  const go = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (open) { setOpen(false); setTimeout(() => scrollToId(id), 80) } // espera a que Lenis se reanude
+    else scrollToId(id)
+  }
 
   return (
     <>
@@ -37,10 +41,10 @@ export function Header() {
         </div>
         <div className="container-x flex h-[68px] items-center justify-between gap-6">
           <a href="#inicio" onClick={go('inicio')} className="group flex items-center gap-3" aria-label="Colegio San Francisco de Borja, ir al inicio">
-            <Crest2D decorative className="h-10 w-auto transition-transform duration-500 group-hover:rotate-[-6deg]" />
-            <span className="leading-tight">
-              <span className="block font-serif text-[1.02rem] font-semibold tracking-tight">San Francisco de Borja</span>
-              <span className={`block text-[0.62rem] font-bold tracking-[0.2em] uppercase ${scrolled ? 'text-rojo' : 'text-oro'}`}>Colegio · San Borja</span>
+            <Crest2D decorative className="h-10 w-auto shrink-0 transition-transform duration-500 group-hover:rotate-[-6deg]" />
+            <span className="leading-tight whitespace-nowrap">
+              <span className="block font-serif text-[0.98rem] font-semibold tracking-tight sm:text-[1.02rem]">San Francisco de Borja</span>
+              <span className={`block text-[0.6rem] font-bold tracking-[0.2em] uppercase ${scrolled ? 'text-rojo' : 'text-oro'}`}>Colegio · San Borja</span>
             </span>
           </a>
           <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
@@ -52,9 +56,11 @@ export function Header() {
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <Magnetic className="hidden sm:inline-block">
-              <a href="#admision" onClick={go('admision')} className={`btn ${scrolled ? 'btn-rojo' : 'btn-oro'} !py-2.5 text-sm`}>Postular 2027</a>
-            </Magnetic>
+            <span className="hidden sm:block">
+              <Magnetic>
+                <a href="#admision" onClick={go('admision')} className={`btn ${scrolled ? 'btn-rojo' : 'btn-oro'} !py-2.5 text-sm whitespace-nowrap`}>Postular 2027</a>
+              </Magnetic>
+            </span>
             <button
               type="button"
               className="grid h-11 w-11 place-items-center rounded-full border border-current/25 lg:hidden"
