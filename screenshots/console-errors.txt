@@ -1,1 +1,4 @@
+desktop-1440: sin errores
+mobile-390: sin errores
+tablet-768: sin errores
 desktop-reduced-motion: sin errores
