@@ -1,0 +1,95 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/fraunces/full.css';
+@import '@fontsource-variable/fraunces/full-italic.css';
+@import '@fontsource-variable/manrope';
+
+@theme {
+  --color-rojo: #d30128;
+  --color-rojo-profundo: #c20f1b;
+  --color-oro: #f9cb24;
+  --color-naranja: #ef922b;
+  --color-crema: #fdf5cc;
+  --color-vino: #3b0710;
+  --color-vino-2: #520a17;
+  --color-tinta: #24070b;
+  --color-papel: #fffbef;
+  --font-serif: 'Fraunces Variable', 'Georgia', serif;
+  --font-sans: 'Manrope Variable', system-ui, sans-serif;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 88px;
+  }
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-stopped { overflow: hidden; }
+  body {
+    @apply bg-papel text-tinta font-sans;
+    overflow-x: clip;
+  }
+  ::selection { background: var(--color-oro); color: var(--color-vino); }
+  :focus-visible {
+    outline: 3px solid var(--color-oro);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  h1, h2, h3 { font-family: var(--font-serif); font-optical-sizing: auto; }
+}
+
+@layer components {
+  .container-x { @apply mx-auto w-full max-w-[1320px] px-5 sm:px-8 lg:px-12; }
+  .kicker {
+    @apply inline-flex items-center gap-2 text-[0.72rem] font-bold tracking-[0.22em] uppercase;
+  }
+  .kicker::before {
+    content: '';
+    width: 22px; height: 2px; border-radius: 2px;
+    background: currentColor; opacity: .7;
+  }
+  .btn {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-[0.95rem] font-bold transition-[background,color,box-shadow] duration-300 select-none;
+  }
+  .btn-rojo { @apply bg-rojo text-white shadow-[0_10px_30px_-10px_rgba(211,1,40,.7)] hover:bg-rojo-profundo; }
+  .btn-oro { @apply bg-oro text-vino shadow-[0_10px_30px_-12px_rgba(249,203,36,.8)] hover:bg-[#ffd84a]; }
+  .btn-linea { @apply border border-current/30 hover:border-current; }
+  .tag-ejemplo {
+    @apply inline-flex items-center gap-1 rounded-full border border-dashed px-2 py-0.5 text-[0.65rem] font-bold tracking-wider uppercase align-middle;
+  }
+  .grain::after {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: .09; mix-blend-mode: overlay;
+  }
+  .split-line { display: block; overflow: hidden; padding-bottom: .08em; margin-bottom: -.08em; }
+  .split-word { display: inline-block; will-change: transform; }
+}
+
+.cursor-dot, .cursor-ring { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 120; border-radius: 9999px; }
+.cursor-dot { width: 6px; height: 6px; background: var(--color-rojo); margin: -3px 0 0 -3px; }
+.cursor-ring {
+  width: 38px; height: 38px; margin: -19px 0 0 -19px;
+  border: 1.5px solid color-mix(in srgb, var(--color-oro) 85%, transparent);
+  transition: width .35s var(--ease-out-expo), height .35s var(--ease-out-expo), margin .35s var(--ease-out-expo), background .35s;
+  mix-blend-mode: difference;
+}
+.cursor-ring.is-hover { width: 64px; height: 64px; margin: -32px 0 0 -32px; background: color-mix(in srgb, var(--color-oro) 25%, transparent); }
+@media (hover: hover) and (pointer: fine) { .has-cursor, .has-cursor a, .has-cursor button { cursor: none; } .has-cursor input, .has-cursor textarea, .has-cursor select { cursor: auto; } }
+
+.marquee-track { display: flex; width: max-content; }
+
+@keyframes shine { to { background-position: 200% center; } }
+.text-oro-shine {
+  background: linear-gradient(100deg, #f9cb24 0%, #ef922b 30%, #fdf5cc 50%, #f9cb24 70%, #ef922b 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shine 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
