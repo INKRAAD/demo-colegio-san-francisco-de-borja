@@ -37,7 +37,7 @@ export function Hero({ ready }: { ready: boolean }) {
         </g>
       </svg>
 
-      <div className="container-x relative grid min-h-[100svh] items-center gap-6 pb-16 pt-[130px] md:grid-cols-[1.05fr_1fr] md:pt-[120px]">
+      <div className="container-x relative grid min-h-[100svh] items-center gap-6 pb-16 pt-[130px] lg:grid-cols-[1.05fr_1fr] lg:pt-[120px]">
         <div className="hero-copy relative z-10 max-w-[640px]">
           <p className="hero-fade mb-6 inline-flex items-center gap-2 rounded-full border border-oro/40 bg-vino/40 px-3.5 py-1.5 text-[0.75rem] font-bold tracking-[0.12em] text-oro uppercase backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-oro shadow-[0_0_12px_#F9CB24]" /> Admisiones 2027 · Inscripciones abiertas
@@ -75,7 +75,7 @@ export function Hero({ ready }: { ready: boolean }) {
           <p className="hero-fade mt-3 text-[0.7rem] text-crema/45">* Calificación según directorios que replican la ficha de Google; por verificar.</p>
         </div>
 
-        <div className="relative order-first h-[38vh] min-h-[260px] md:order-none md:h-[78vh]">
+        <div className="relative order-first h-[36vh] min-h-[250px] lg:order-none lg:h-[78vh]">
           {use3D ? (
             <Suspense fallback={null}>
               <div className={`absolute inset-0 transition-opacity duration-700 ${glReady ? 'opacity-100' : 'opacity-0'}`}>
@@ -83,7 +83,9 @@ export function Hero({ ready }: { ready: boolean }) {
               </div>
             </Suspense>
           ) : (
-            <CrestAssemble2D start={ready} className="mx-auto h-full max-h-[360px] w-auto aspect-[212/240] md:max-h-[520px]" />
+            <div className="absolute inset-0 grid place-items-center">
+              <CrestAssemble2D start={ready} className="aspect-[212/240] h-[min(100%,340px)] lg:h-[min(100%,500px)]" />
+            </div>
           )}
         </div>
       </div>

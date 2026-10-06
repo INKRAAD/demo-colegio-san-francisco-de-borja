@@ -1,1 +1,1 @@
-mobile-390: sin errores
+desktop-reduced-motion: sin errores

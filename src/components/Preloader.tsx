@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CREST2D } from '../data/crest'
 import { gsap, prefersReducedMotion } from '../lib/motion'
 
@@ -6,9 +6,11 @@ import { gsap, prefersReducedMotion } from '../lib/motion'
 export function Preloader({ onDone }: { onDone: () => void }) {
   const root = useRef<HTMLDivElement>(null)
   const num = useRef<HTMLSpanElement>(null)
+  const [gone, setGone] = useState(false)
   useEffect(() => {
-    const el = root.current!
-    if (prefersReducedMotion()) { const t = setTimeout(onDone, 150); return () => clearTimeout(t) }
+    const el = root.current
+    if (!el) return
+    if (prefersReducedMotion()) { const t = setTimeout(() => { onDone(); setGone(true) }, 150); return () => clearTimeout(t) }
     const paths = el.querySelectorAll<SVGPathElement>('.draw')
     paths.forEach((p) => { const l = p.getTotalLength(); gsap.set(p, { strokeDasharray: l, strokeDashoffset: l }) })
     const o = { v: 0 }
@@ -18,11 +20,12 @@ export function Preloader({ onDone }: { onDone: () => void }) {
       .to(el.querySelector('.fill'), { opacity: 1, duration: 0.5 }, 1.35)
       .to(el.querySelector('.inner'), { scale: 0.85, opacity: 0, duration: 0.6, ease: 'power3.in' }, 2.0)
       .to(el, { clipPath: 'inset(0 0 100% 0)', duration: 1, ease: 'expo.inOut', onStart: () => onDone() }, 2.35)
-      .set(el, { display: 'none' })
+      .call(() => setGone(true))
     document.fonts?.ready.catch(() => {})
     return () => { tl.kill() }
   }, [onDone])
 
+  if (gone) return null
   return (
     <div
       ref={root}
