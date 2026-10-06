@@ -2,7 +2,6 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, Lightformer, Sparkles } from '@react-three/drei'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { CREST3D } from '../data/crest'
 
 /* ------------------------------------------------------------------
@@ -11,10 +10,47 @@ import { CREST3D } from '../data/crest'
  * ensambla. Luego flota y sigue al puntero / al scroll.
  * ------------------------------------------------------------------ */
 
-const loader = new SVGLoader()
-function shapesFrom(d: string) {
-  const data = loader.parse(`<svg xmlns="http://www.w3.org/2000/svg"><path d="${d}"/></svg>`)
-  return data.paths.flatMap((p) => SVGLoader.createShapes(p))
+/** Convierte un path SVG absoluto (M L H V Q C Z) en THREE.Shape con agujeros (regla par-impar). */
+function shapesFrom(d: string, div = 10): THREE.Shape[] {
+  const tokens = d.match(/[MLHVQCZ]|-?\d*\.?\d+/gi) ?? []
+  const contours: THREE.Path[] = []
+  let path: THREE.Path | null = null
+  let cmd = ''
+  let x = 0, y = 0
+  let i = 0
+  const n = () => parseFloat(tokens[i++])
+  while (i < tokens.length) {
+    const t = tokens[i]
+    if (/[A-Za-z]/.test(t)) { cmd = t.toUpperCase(); i++; if (cmd === 'Z') { path?.closePath(); continue } }
+    switch (cmd) {
+      case 'M': x = n(); y = n(); path = new THREE.Path(); path.moveTo(x, y); contours.push(path); cmd = 'L'; break
+      case 'L': x = n(); y = n(); path!.lineTo(x, y); break
+      case 'H': x = n(); path!.lineTo(x, y); break
+      case 'V': y = n(); path!.lineTo(x, y); break
+      case 'Q': { const a = n(), b = n(); x = n(); y = n(); path!.quadraticCurveTo(a, b, x, y); break }
+      case 'C': { const a = n(), b = n(), c = n(), e = n(); x = n(); y = n(); path!.bezierCurveTo(a, b, c, e, x, y); break }
+      default: i++
+    }
+  }
+  const pts = contours.map((c) => c.getPoints(div))
+  const inside = (p: THREE.Vector2, poly: THREE.Vector2[]) => {
+    let r = false
+    for (let a = 0, b = poly.length - 1; a < poly.length; b = a++) {
+      const pa = poly[a], pb = poly[b]
+      if ((pa.y > p.y) !== (pb.y > p.y) && p.x < ((pb.x - pa.x) * (p.y - pa.y)) / (pb.y - pa.y) + pa.x) r = !r
+    }
+    return r
+  }
+  const depth = pts.map((p, k) => pts.reduce((acc, q, j) => acc + (j !== k && inside(p[0], q) ? 1 : 0), 0))
+  const shapes = new Map<number, THREE.Shape>()
+  pts.forEach((p, k) => { if (depth[k] % 2 === 0) shapes.set(k, new THREE.Shape(p)) })
+  pts.forEach((p, k) => {
+    if (depth[k] % 2 === 1) {
+      const parent = [...shapes.keys()].filter((j) => inside(p[0], pts[j])).sort((a, b) => Math.abs(THREE.ShapeUtils.area(pts[a])) - Math.abs(THREE.ShapeUtils.area(pts[b])))[0]
+      if (parent !== undefined) shapes.get(parent)!.holes.push(new THREE.Path(p))
+    }
+  })
+  return [...shapes.values()]
 }
 
 type Piece = {
@@ -45,10 +81,10 @@ function capsuleBetween(a: [number, number], b: [number, number], r = 3.25) {
 
 function usePieces(): Piece[] {
   return useMemo(() => {
-    const outer = shapesFrom(CREST3D.outer)[0]
-    const inner = shapesFrom(CREST3D.inner)[0]
+    const outer = shapesFrom(CREST3D.outer, 40)[0]
+    const inner = shapesFrom(CREST3D.inner, 40)[0]
     const ring = outer.clone()
-    ring.holes = [new THREE.Path(inner.getPoints(64))]
+    ring.holes = [new THREE.Path(inner.getPoints())]
 
     const borde = new THREE.ExtrudeGeometry(ring, { depth: 14, bevelEnabled: true, bevelThickness: 2.2, bevelSize: 1.6, bevelSegments: 5, curveSegments: 48 })
     const campo = new THREE.ExtrudeGeometry(inner, { depth: 8, bevelEnabled: true, bevelThickness: 0.8, bevelSize: 0.6, bevelSegments: 3, curveSegments: 48 })
@@ -93,7 +129,7 @@ function CrestModel({ start, onAssembled }: { start: boolean; onAssembled?: () =
   const mats = useMemo(
     () => ({
       oro: new THREE.MeshStandardMaterial({ color: '#F9CB24', metalness: 0.92, roughness: 0.26, envMapIntensity: 1.25 }),
-      rojo: new THREE.MeshPhysicalMaterial({ color: '#D30128', metalness: 0.05, roughness: 0.38, clearcoat: 1, clearcoatRoughness: 0.18 }),
+      rojo: new THREE.MeshPhysicalMaterial({ color: '#D30128', metalness: 0, roughness: 0.5, clearcoat: 0.8, clearcoatRoughness: 0.12, envMapIntensity: 0.55 }),
       crema: new THREE.MeshPhysicalMaterial({ color: '#FDF5CC', metalness: 0, roughness: 0.32, clearcoat: 0.6 }),
     }),
     [],
@@ -171,8 +207,8 @@ export default function Crest3D({ start, onReady, onAssembled }: { start: boolea
         camera={{ position: [0, 0, 6.2], fov: 34 }}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
         onCreated={({ gl }) => {
-          gl.toneMapping = THREE.ACESFilmicToneMapping
-          gl.toneMappingExposure = 1.05
+          gl.toneMapping = THREE.NeutralToneMapping
+          gl.toneMappingExposure = 1
           onReady?.()
         }}
         aria-hidden
